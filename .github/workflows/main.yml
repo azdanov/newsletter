@@ -20,28 +20,29 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: Run tests
         run: cargo test
-  fmt:
-    name: Rustfmt
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - name: Install the Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          components: rustfmt
-      - name: Rustfmt Check
-        uses: actions-rust-lang/rustfmt@v1
   clippy:
-    name: Clippy
+    name: Clippy check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - name: Install the Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Checkout sources
+        uses: actions/checkout@v5
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
+          toolchain: stable
           components: clippy
-      - name: Run Clippy
-        run: cargo clippy -- -D warnings
+      - name: Clippy check
+        run: cargo clippy --all-features
+  fmt:
+    name: Rustfmt check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v5
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: nightly
+          components: rustfmt
+      - run: cargo +nightly fmt --all -- --check
   coverage:
     name: Code coverage
     runs-on: ubuntu-latest
