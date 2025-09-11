@@ -1,10 +1,12 @@
-use newsletter::create_router;
+use newsletter::serve;
+use reqwest::Client;
+use tokio::net::TcpListener;
 
 #[tokio::test]
 async fn health_check_works() {
     // Arrange
     let url = start_app().await;
-    let client = reqwest::Client::new();
+    let client = Client::new();
 
     // Act
     let response = client
@@ -19,15 +21,13 @@ async fn health_check_works() {
 }
 
 async fn start_app() -> String {
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:0")
+    let listener = TcpListener::bind("127.0.0.1:0")
         .await
         .expect("Failed to bind random port");
     let port = listener.local_addr().unwrap().port();
 
-    // No cleanup is necessary, since tokio will do it once runtime is done.
-    tokio::spawn(async {
-        axum::serve(listener, create_router()).await.unwrap();
-    });
+    // No cleanup is necessary since Tokio will do it once the runtime is done.
+    tokio::spawn(async { serve(listener)?.await });
 
     format!("http://127.0.1:{}", port)
 }
