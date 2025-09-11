@@ -1,4 +1,4 @@
-use newsletter::make_service;
+use newsletter::create_router;
 
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
@@ -8,5 +8,5 @@ async fn main() -> Result<(), std::io::Error> {
 
     println!("listening on http://{}", listener.local_addr().unwrap());
 
-    axum::serve(listener, make_service()).await
+    axum::serve(listener, create_router()).await
 }
