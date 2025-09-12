@@ -1,0 +1,21 @@
+services:
+  postgresql:
+    image: postgres:17.6
+    ports:
+      - 5432:5432
+    volumes:
+      - "postgresql_data:/bitnami/postgresql"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: newsletter
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 1s
+      timeout: 5s
+      retries: 5
+volumes:
+  postgresql_data:
+    driver: local

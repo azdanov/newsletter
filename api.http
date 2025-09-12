@@ -1,0 +1,19 @@
+### 
+
+GET http://localhost:8000/health HTTP/1.1
+
+
+### 
+
+@email = john@example.com
+@name = John Doe
+
+POST http://localhost:8000/subscriptions HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+email={{email}}&
+name={{name}}
+
+
+### 
