@@ -1,14 +1,14 @@
 use newsletter::{config::DbConfig, startup::serve};
 use reqwest::Client;
 use sqlx::PgPool;
-use testcontainers::{ContainerAsync, ImageExt, runners::AsyncRunner};
-use testcontainers_modules::postgres::{self, Postgres};
-use tokio::net::TcpListener;
+use testcontainers::{ImageExt, runners::AsyncRunner};
+use testcontainers_modules::postgres;
+use tokio::{net::TcpListener, task::JoinHandle};
 
 pub struct TestApp {
     pub url: String,
     pub db_pool: PgPool,
-    pub container: ContainerAsync<Postgres>,
+    _server: JoinHandle<()>,
 }
 
 async fn init() -> TestApp {
@@ -34,13 +34,24 @@ async fn init() -> TestApp {
     let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
     let port = listener.local_addr().unwrap().port();
 
-    let server = serve(listener, pool.clone()).await.unwrap().into_future();
-    tokio::spawn(server);
+    let server_future = serve(listener, pool.clone()).await.unwrap().into_future();
+    let handle = tokio::spawn(async move {
+        let _container = container;
+        if let Err(e) = server_future.await {
+            eprintln!("server error: {e}");
+        }
+    });
 
     TestApp {
         url: format!("http://127.0.0.1:{}", port),
         db_pool: pool,
-        container,
+        _server: handle,
+    }
+}
+
+impl Drop for TestApp {
+    fn drop(&mut self) {
+        self._server.abort();
     }
 }
 
