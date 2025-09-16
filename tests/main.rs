@@ -1,5 +1,6 @@
 use newsletter::{config::DbConfig, startup::serve};
 use reqwest::Client;
+use secrecy::SecretString;
 use sqlx::PgPool;
 use testcontainers::{ImageExt, runners::AsyncRunner};
 use testcontainers_modules::postgres;
@@ -22,7 +23,7 @@ async fn init() -> TestApp {
         host: "127.0.0.1".to_string(),
         port: container.get_host_port_ipv4(5432).await.unwrap(),
         username: "postgres".to_string(),
-        password: "postgres".to_string(),
+        password: SecretString::from("postgres"),
         db_name: "newsletter".to_string(),
     };
     let pool = PgPool::connect(&db_config.connection_string())
