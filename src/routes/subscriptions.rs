@@ -26,7 +26,7 @@ pub async fn create_subscription(
     {
         Ok(_) => StatusCode::OK,
         Err(e) => {
-            println!("Failed to execute query: {}", e);
+            tracing::error!("Failed to execute query: {}", e);
             StatusCode::INTERNAL_SERVER_ERROR
         }
     }

@@ -1,3 +1,5 @@
+use std::{env, sync::LazyLock};
+
 use newsletter::{config::DbConfig, startup::serve};
 use reqwest::Client;
 use secrecy::SecretString;
@@ -5,6 +7,21 @@ use sqlx::PgPool;
 use testcontainers::{ImageExt, runners::AsyncRunner};
 use testcontainers_modules::postgres;
 use tokio::{net::TcpListener, task::JoinHandle};
+use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
+
+static TRACING: LazyLock<()> = LazyLock::new(|| {
+    let log_tests = env::var("LOG_TESTS").unwrap_or_default() == "true";
+    let filter = if log_tests {
+        "newsletter=info,tower_http=trace,axum::rejection=trace".to_string()
+    } else {
+        "off".to_string()
+    };
+
+    tracing_subscriber::registry()
+        .with(EnvFilter::new(filter))
+        .with(tracing_subscriber::fmt::layer())
+        .init();
+});
 
 pub struct TestApp {
     pub url: String,
@@ -13,6 +30,7 @@ pub struct TestApp {
 }
 
 async fn init() -> TestApp {
+    LazyLock::force(&TRACING);
     let container = postgres::Postgres::default()
         .with_db_name("newsletter")
         .with_tag("17.6")
@@ -39,7 +57,7 @@ async fn init() -> TestApp {
     let handle = tokio::spawn(async move {
         let _container = container;
         if let Err(e) = server_future.await {
-            eprintln!("server error: {e}");
+            panic!("Server failed: {}", e);
         }
     });
 
