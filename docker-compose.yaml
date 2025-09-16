@@ -1,5 +1,17 @@
 services:
-  postgresql:
+  app:
+    build: .
+    ports:
+      - 8000:8000
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - CUSTOM_APP__HOST=0.0.0.0
+      - CUSTOM_DB__HOST=db
+    volumes:
+      - ./config.yaml:/app/config.yaml
+  db:
     image: postgres:17.6
     ports:
       - 5432:5432

@@ -43,8 +43,9 @@ async fn init() -> TestApp {
         username: "postgres".to_string(),
         password: SecretString::from("postgres"),
         db_name: "newsletter".to_string(),
+        require_ssl: false,
     };
-    let pool = PgPool::connect(&db_config.connection_string())
+    let pool = PgPool::connect_with(db_config.connect_options())
         .await
         .unwrap();
 
