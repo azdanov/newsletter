@@ -122,7 +122,7 @@ async fn subscribe_returns_a_200_for_valid_form_data() {
 }
 
 #[tokio::test]
-async fn subscribe_returns_a_400_when_data_is_missing() {
+async fn subscribe_returns_a_422_when_data_is_missing() {
     // Arrange
     let app = init().await;
     let client = Client::new();
@@ -146,8 +146,39 @@ async fn subscribe_returns_a_400_when_data_is_missing() {
         assert_eq!(
             422,
             response.status().as_u16(),
-            "when the body is {}",
+            "{} should return a 422 Unprocessable Entity",
             error_message
+        );
+    }
+}
+
+#[tokio::test]
+async fn subscribe_returns_a_400_when_fields_are_present_but_invalid() {
+    // Arrange
+    let app = init().await;
+    let client = reqwest::Client::new();
+    let test_cases = vec![
+        ("name=&email=ursula_le_guin%40gmail.com", "empty name"),
+        ("name=Ursula&email=", "empty email"),
+        ("name=Ursula&email=definitely-not-an-email", "invalid email"),
+    ];
+
+    for (body, description) in test_cases {
+        // Act
+        let response = client
+            .post(format!("{}/subscriptions", &app.url))
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .body(body)
+            .send()
+            .await
+            .expect("Failed to execute request.");
+
+        // Assert
+        assert_eq!(
+            400,
+            response.status().as_u16(),
+            "{} should return 400 Bad Request",
+            description
         );
     }
 }

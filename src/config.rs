@@ -46,7 +46,7 @@ impl DbConfig {
     }
 }
 
-pub fn get_config() -> Result<Config, config::ConfigError> {
+pub fn get_config() -> Result<Config, anyhow::Error> {
     let settings = config::Config::builder()
         .add_source(config::File::new("config.yaml", config::FileFormat::Yaml))
         .add_source(
@@ -55,5 +55,5 @@ pub fn get_config() -> Result<Config, config::ConfigError> {
                 .separator("__"),
         )
         .build()?;
-    settings.try_deserialize::<Config>()
+    Ok(settings.try_deserialize::<Config>()?)
 }

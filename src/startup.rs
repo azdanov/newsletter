@@ -19,7 +19,7 @@ const REQUEST_ID_HEADER: &str = "x-request-id";
 pub async fn serve(
     listener: TcpListener,
     pool: PgPool,
-) -> Result<Serve<TcpListener, Router, Router>, std::io::Error> {
+) -> Result<Serve<TcpListener, Router, Router>, anyhow::Error> {
     let app = Router::new()
         .route("/health", get(check_health))
         .route("/subscriptions", post(create_subscription))
