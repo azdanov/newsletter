@@ -1,10 +1,11 @@
 use anyhow::anyhow;
-use once_cell::sync::Lazy;
 use regex::Regex;
+use std::sync::LazyLock;
 use unicode_segmentation::UnicodeSegmentation;
 use validator::ValidateEmail;
 
-static RE_VALID_NAME: Lazy<Regex> = Lazy::new(|| Regex::new(r#"^[^/()"<>\\{}]+$"#).unwrap());
+static RE_VALID_NAME: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"^[^/()"<>\\{}]+$"#).unwrap());
 
 #[derive(Debug)]
 pub struct SubscriberEmail(String);
