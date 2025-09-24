@@ -6,6 +6,7 @@ use sqlx::postgres::{PgConnectOptions, PgSslMode};
 pub struct Config {
     pub app: AppConfig,
     pub db: DbConfig,
+    pub email: EmailConfig,
 }
 
 #[derive(Deserialize, Debug)]
@@ -44,6 +45,14 @@ impl DbConfig {
                 PgSslMode::Prefer
             })
     }
+}
+
+#[derive(serde::Deserialize, Clone, Debug)]
+pub struct EmailConfig {
+    pub base_url: String,
+    pub sender_email: String,
+    pub authorization_token: SecretString,
+    pub timeout_milliseconds: u64,
 }
 
 pub fn get_config() -> Result<Config, anyhow::Error> {
