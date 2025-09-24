@@ -1,10 +1,9 @@
+use crate::domain::NewSubscriber;
 use axum::{Form, extract::State, http::StatusCode};
 use chrono::Utc;
 use serde::Deserialize;
 use sqlx::PgPool;
 use uuid::Uuid;
-
-use crate::domain::NewSubscriber;
 
 #[derive(Deserialize)]
 pub struct FormData {
@@ -32,8 +31,7 @@ pub async fn create_subscription(
         }
     };
 
-    match sqlx::query!(
-        "INSERT INTO subscriptions (id, email, name, subscribed_at, status) VALUES ($1, $2, $3, $4, 'pending_confirmation')",
+    match sqlx::query!("INSERT INTO subscriptions (id, email, name, subscribed_at, status) VALUES ($1, $2, $3, $4, 'pending_confirmation')",
         Uuid::now_v7(),
         subscriber.email.as_ref(),
         subscriber.name.as_ref(),

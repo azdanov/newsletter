@@ -1,3 +1,4 @@
-mod new_subscriber;
+mod subscriber;
 
-pub use new_subscriber::NewSubscriber;
+pub use subscriber::NewSubscriber;
+pub use subscriber::SubscriberEmail;

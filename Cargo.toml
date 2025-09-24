@@ -43,5 +43,10 @@ uuid = { version = "1.18.1", features = ["v7"] }
 validator = { version = "0.20.0", features = ["derive"] }
 
 [dev-dependencies]
+claims = "0.8.0"
+fake = "4.4.0"
+linkify = "0.10.0"
+serde_json = "1.0.145"
 testcontainers = "0.25.0"
 testcontainers-modules = { version = "0.13.0", features = ["postgres"] }
+wiremock = "0.6.5"
