@@ -33,7 +33,7 @@ pub async fn create_subscription(
     };
 
     match sqlx::query!(
-        "INSERT INTO subscriptions (id, email, name, subscribed_at) VALUES ($1, $2, $3, $4)",
+        "INSERT INTO subscriptions (id, email, name, subscribed_at, status) VALUES ($1, $2, $3, $4, 'pending_confirmation')",
         Uuid::now_v7(),
         subscriber.email.as_ref(),
         subscriber.name.as_ref(),
