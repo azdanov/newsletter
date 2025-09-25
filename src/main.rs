@@ -1,4 +1,4 @@
-use newsletter::{config::get_config, startup::serve};
+use newsletter::{config::get_config, email_client::EmailClient, startup::serve};
 use sqlx::PgPool;
 use tokio::net::TcpListener;
 use tracing::info;
@@ -12,11 +12,22 @@ async fn main() -> Result<(), anyhow::Error> {
 
     let config = get_config()?;
     let db_pool = PgPool::connect_with(config.db.connect_options()).await?;
+    let sender_email = config.email.sender()?;
+    let timeout = config.email.timeout();
+    let base_url = config.email.base_url;
+    let email_client = EmailClient::new(
+        base_url.0.clone(),
+        sender_email,
+        config.email.authorization_token,
+        timeout,
+    );
     let listener = TcpListener::bind(config.app.address()).await?;
 
     info!("listening on http://{} ", listener.local_addr()?);
 
-    Ok(serve(listener, db_pool).await?.await?)
+    Ok(serve(listener, db_pool, email_client, base_url)
+        .await?
+        .await?)
 }
 
 fn init_tracing() {

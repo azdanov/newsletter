@@ -1,6 +1,8 @@
+use crate::domain::SubscriberEmail;
 use secrecy::{ExposeSecret, SecretString};
 use serde::Deserialize;
 use sqlx::postgres::{PgConnectOptions, PgSslMode};
+use std::time::Duration;
 
 #[derive(Deserialize, Debug)]
 pub struct Config {
@@ -47,12 +49,31 @@ impl DbConfig {
     }
 }
 
+#[derive(Deserialize, Clone, Debug)]
+pub struct AppBaseUrl(pub String);
+
+impl From<&str> for AppBaseUrl {
+    fn from(s: &str) -> Self {
+        Self(s.to_string())
+    }
+}
+
 #[derive(serde::Deserialize, Clone, Debug)]
 pub struct EmailConfig {
-    pub base_url: String,
+    pub base_url: AppBaseUrl,
     pub sender_email: String,
     pub authorization_token: SecretString,
     pub timeout_milliseconds: u64,
+}
+
+impl EmailConfig {
+    pub fn sender(&self) -> Result<SubscriberEmail, anyhow::Error> {
+        SubscriberEmail::parse(self.sender_email.clone())
+    }
+
+    pub fn timeout(&self) -> Duration {
+        Duration::from_millis(self.timeout_milliseconds)
+    }
 }
 
 pub fn get_config() -> Result<Config, anyhow::Error> {

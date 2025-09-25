@@ -31,7 +31,7 @@ impl EmailClient {
         subject: &str,
         html_content: &str,
         text_content: &str,
-    ) -> Result<(), reqwest::Error> {
+    ) -> Result<(), anyhow::Error> {
         let url = format!("{}/email", self.base_url);
         let request_body = SendEmailRequest {
             from: self.sender.as_ref(),
@@ -93,22 +93,18 @@ mod tests {
         }
     }
 
-    /// Generate a random email subject
     fn subject() -> String {
         Sentence(1..2).fake()
     }
 
-    /// Generate a random email content
     fn content() -> String {
         Paragraph(1..10).fake()
     }
 
-    /// Generate a random subscriber email
     fn email() -> SubscriberEmail {
         SubscriberEmail::parse(SafeEmail().fake()).unwrap()
     }
 
-    /// Get a test instance of `EmailClient`.
     fn email_client(base_url: String) -> EmailClient {
         EmailClient::new(
             base_url,

@@ -1,4 +1,8 @@
-use crate::routes::{check_health, create_subscription};
+use crate::{
+    config::AppBaseUrl,
+    email_client::EmailClient,
+    routes::{check_health, confirm, subscribe},
+};
 use axum::{
     Router,
     http::{HeaderName, Request},
@@ -6,6 +10,7 @@ use axum::{
     serve::Serve,
 };
 use sqlx::PgPool;
+use std::sync::Arc;
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
 use tower_http::{
@@ -16,14 +21,29 @@ use tracing::{error, info_span};
 
 const REQUEST_ID_HEADER: &str = "x-request-id";
 
+#[derive(Clone)]
+pub struct AppState {
+    pub db_pool: PgPool,
+    pub email_client: Arc<EmailClient>,
+    pub base_url: AppBaseUrl,
+}
+
 pub async fn serve(
     listener: TcpListener,
     pool: PgPool,
+    email_client: EmailClient,
+    base_url: AppBaseUrl,
 ) -> Result<Serve<TcpListener, Router, Router>, anyhow::Error> {
+    let app_state = AppState {
+        db_pool: pool.clone(),
+        email_client: Arc::new(email_client),
+        base_url,
+    };
     let app = Router::new()
         .route("/health", get(check_health))
-        .route("/subscriptions", post(create_subscription))
-        .with_state(pool);
+        .route("/subscriptions", post(subscribe))
+        .route("/subscriptions/confirm", get(confirm))
+        .with_state(app_state);
 
     let app = add_tracing(app);
 

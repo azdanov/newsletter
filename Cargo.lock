@@ -1458,6 +1458,7 @@ dependencies = [
  "config",
  "fake",
  "linkify",
+ "rand 0.9.2",
  "regex",
  "reqwest",
  "secrecy",
