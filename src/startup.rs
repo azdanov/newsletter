@@ -1,7 +1,7 @@
 use crate::{
     config::AppBaseUrl,
     email_client::EmailClient,
-    routes::{check_health, confirm, subscribe},
+    routes::{check_health, confirm, publish_newsletter, subscribe},
 };
 use axum::{
     Router,
@@ -43,6 +43,7 @@ pub async fn serve(
         .route("/health", get(check_health))
         .route("/subscriptions", post(subscribe))
         .route("/subscriptions/confirm", get(confirm))
+        .route("/newsletters", post(publish_newsletter))
         .with_state(app_state);
 
     let app = add_tracing(app);
